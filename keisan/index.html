@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>計算ドリル道場</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      margin: 20px;
+      padding: 0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 24px;
+      margin-top: 40px;
+      border-top: 2px solid #ccc;
+      padding-top: 20px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 30px;
+    }
+    li {
+      text-align: left;
+      margin: 4px 0;
+    }
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+    a:hover {
+      color: #007acc;
+    }
+    .question-box {
+      font-size: 28px;
+      margin: 20px;
+    }
+    input[type="number"] {
+      font-size: 24px;
+      padding: 6px;
+      width: 100px;
+      text-align: center;
+    }
+    button {
+      font-size: 18px;
+      padding: 8px 20px;
+      margin: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    .result {
+      font-size: 22px;
+      margin-top: 10px;
+      height: 32px;
+    }
+    /* モーダル基本幅 */
+#modal {
+  display: none;
+  position: fixed;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;       /* 幅を90vwに */
+  height: 85vh;      /* 高さ85vhで縦も大きく */
+  background: white;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  border-bottom: 4px solid #4CAF50;
+  z-index: 1000;
+  padding: 30px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;  /* 縦に長くなってもスクロールできる */
+}
+
+@media (max-width: 480px) {
+  #modal {
+    width: 95vw;
+    height: 90vh;
+    padding: 20px;
+  }
+}
+
+#modal.show {
+  display: block;
+}
+
+#modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 28px;       /* 文字も大きく */
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+#modal .close-btn {
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: bold;
+  border: none;
+  background: none;
+  color: red;
+}
+
+#modal .question-box {
+  font-size: 32px;  /* 質問文も大きく */
+  margin: 15px 0;
+}
+
+    /* モーダル内の答え欄は直接入力不可に */
+    #modal input[type="number"] {
+      font-size: 24px;
+      padding: 6px;
+      width: 120px;
+      text-align: center;
+      pointer-events: none;
+      background-color: #f0f0f0;
+      color: #333;
+      user-select: none;
+    }
+    #modal button.answer-btn {
+      font-size: 18px;
+      padding: 8px 20px;
+      margin: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #modal button.answer-btn:hover {
+      background-color: #388e3c;
+    }
+    #modal .result {
+      font-size: 22px;
+      margin-top: 10px;
+      height: 32px;
+    }
+    /* モーダル内のタッチパネル */
+    #modalNumPad {
+  margin-top: 20px;
+  user-select: none;
+}
+
+.num-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;         /* 折り返し可能に */
+  gap: 12px;               /* ボタン間隔を追加 */
+  margin-bottom: 12px;
+}
+
+#modalNumPad button {
+  font-size: 36px;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  border: 1.5px solid #aaa;
+  background-color: #eee;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#modalNumPad button:hover {
+  background-color: #ddd;
+}
+
+/* スマホ対応 */
+@media (max-width: 480px) {
+  #modalNumPad button {
+    font-size: 30px;
+    width: 70px;
+    height: 70px;
+    margin: 4px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h1>計算ドリル道場</h1>
+
+  <h2>足し算</h2>
+  <ul>
+    <li><a href="#add1">┠ Level1 1ケタ+1ケタの繰り上がりあり</a></li>
+    <li><a href="#add2">┠ Level2 2ケタ+1ケタ（繰り上がりなし）</a></li>
+    <li><a href="#add3">┠ Level3 2ケタ+1ケタ（繰り上がりあり・答え50まで）</a></li>
+    <li><a href="#add4">┠ Level4 2ケタ+2ケタ（繰り上がりなし・答え2ケタ）</a></li>
+    <li><a href="#add5">┗ Level5 2ケタ+2ケタ（繰り上がりあり・答え2ケタ）</a></li>
+  </ul>
+
+  <h2>引き算</h2>
+  <ul>
+    <li><a href="#sub1">┠ Level1 2ケタ−1ケタ（繰り下がりあり・答え1ケタ）</a></li>
+    <li><a href="#sub2">┠ Level2 2ケタ−1ケタ（繰り下がりなし）</a></li>
+    <li><a href="#sub3">┠ Level3 2ケタ−1ケタ（繰り下がりあり・引かれる数50まで）</a></li>
+    <li><a href="#sub4">┠ Level4 2ケタ−2ケタ（繰り下がりなし）</a></li>
+    <li><a href="#sub5">┗ Level5 2ケタ−2ケタ（繰り下がりあり）</a></li>
+  </ul>
+
+  <h2>タイムアタックモード</h2>
+  <button onclick="startTimeAttack()">▶ タイムアタック（10問ランダム）</button>
+
+  <div id="levelContainer"></div>
+
+  <!-- モーダル -->
+  <div id="modal">
+    <div class="modal-header">
+      <span id="modalTitle">Level名</span>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="question-box" id="modalQuestion"></div>
+    <input type="number" id="modalAnswerInput" placeholder="こたえ" readonly />
+    <br />
+    <!-- タッチパネル -->
+    <div id="modalNumPad">
+      <div class="num-row">
+        <button type="button" data-num="1">1</button>
+        <button type="button" data-num="2">2</button>
+        <button type="button" data-num="3">3</button>
+      </div>
+      <div class="num-row">
+        <button type="button" data-num="4">4</button>
+        <button type="button" data-num="5">5</button>
+        <button type="button" data-num="6">6</button>
+      </div>
+      <div class="num-row">
+        <button type="button" data-num="7">7</button>
+        <button type="button" data-num="8">8</button>
+        <button type="button" data-num="9">9</button>
+      </div>
+      <div class="num-row">
+        <button type="button" id="clearBtn">C</button>
+        <button type="button" data-num="0">0</button>
+        <button type="button" id="backspaceBtn">←</button>
+      </div>
+    </div>
+    <button class="answer-btn" onclick="checkModalAnswer()">こたえる</button>
+    <div class="result" id="modalResult"></div>
+  </div>
+
+  <script>
+    // 汎用乱数関数
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // 問題生成関数群
+    const generators = {
+      add1: () => {
+        let a = rand(1, 9), b = rand(1, 9);
+        if (a + b < 10) return generators.add1();
+        return { a, b, op: "+" };
+      },
+      add2: () => {
+        let a = rand(10, 99), b = rand(1, 9);
+        if ((a % 10 + b) >= 10) return generators.add2();
+        return { a, b, op: "+" };
+      },
+      add3: () => {
+        let a = rand(10, 49), b = rand(1, 9);
+        if ((a % 10 + b) < 10 || a + b > 50) return generators.add3();
+        return { a, b, op: "+" };
+      },
+      add4: () => {
+        let a = rand(10, 99), b = rand(10, 99);
+        if ((a % 10 + b % 10) >= 10 || a + b >= 100) return generators.add4();
+        return { a, b, op: "+" };
+      },
+      add5: () => {
+        let a = rand(10, 99), b = rand(10, 99);
+        if ((a % 10 + b % 10) < 10 || a + b >= 100) return generators.add5();
+        return { a, b, op: "+" };
+      },
+      sub1: () => {
+        let a = rand(11, 99), b = rand(1, 9);
+        if ((a % 10) >= b || a - b >= 10) return generators.sub1();
+        return { a, b, op: "-" };
+      },
+      sub2: () => {
+        let a = rand(11, 99), b = rand(1, 9);
+        if ((a % 10) < b) return generators.sub2();
+        return { a, b, op: "-" };
+      },
+      sub3: () => {
+        let a = rand(10, 49), b = rand(1, 9);
+        if ((a % 10) >= b) return generators.sub3();
+        return { a, b, op: "-" };
+      },
+      sub4: () => {
+        let a = rand(10, 99), b = rand(10, 99);
+        if ((a % 10) < (b % 10) || a < b) return generators.sub4();
+        return { a, b, op: "-" };
+      },
+      sub5: () => {
+        let a = rand(10, 99), b = rand(10, 99);
+        if ((a % 10) >= (b % 10) || a < b) return generators.sub5();
+        return { a, b, op: "-" };
+      }
+    };
+
+    const generatorKeys = Object.keys(generators);
+
+    // 個別レベルモード開始
+    function startLevel(levelId, generator) {
+      const container = document.getElementById("levelContainer");
+      container.innerHTML = `
+        <a name="${levelId}"></a>
+        <div class="question-box" id="question"></div>
+        <input type="number" id="answerInput" placeholder="こたえ" />
+        <br />
+        <button onclick="checkAnswer()">こたえる</button>
+        <div class="result" id="result"></div>
+      `;
+      window.currentGenerator = generator;
+      nextQuestion();
+    }
+
+    // 次の問題を表示
+    function nextQuestion() {
+      const q = window.currentGenerator();
+      window.currentProblem = q;
+      document.getElementById("question").textContent = `${q.a} ${q.op} ${q.b} = ?`;
+      document.getElementById("answerInput").value = "";
+      document.getElementById("answerInput").focus();
+      document.getElementById("result").textContent = "";
+    }
+
+    // 答えをチェック（個別モード／タイムアタック共通）
+    function checkAnswer() {
+      const userAnswer = parseInt(document.getElementById("answerInput").value);
+      const correct = window.currentProblem.op === "+"
+        ? window.currentProblem.a + window.currentProblem.b
+        : window.currentProblem.a - window.currentProblem.b;
+      const resultDiv = document.getElementById("result");
+
+      if (userAnswer === correct) {
+        if (window.timeAttackActive) {
+          window.timeAttackProgress++;
+          if (window.timeAttackProgress >= 10) {
+            const time = ((Date.now() - window.timeAttackStartTime) / 1000).toFixed(2);
+            resultDiv.innerHTML = `✅ 10問クリア！<br>タイム：${time} 秒<br><button onclick="startTimeAttack()">もういちど！</button>`;
+            window.timeAttackActive = false;
+            return;
+          }
+          nextTimeAttackQuestion();
+        } else {
+          resultDiv.innerHTML = `⭕ せいかい！<br><button onclick="nextQuestion()">つぎへ ▶</button>`;
+        }
+      } else {
+        resultDiv.textContent = "❌ まちがい！もういちど！";
+      }
+    }
+
+    // --- タイムアタックモード ---
+
+    function startTimeAttack() {
+      const container = document.getElementById("levelContainer");
+      container.innerHTML = `
+        <div class="question-box" id="question"></div>
+        <input type="number" id="answerInput" placeholder="こたえ" />
+        <br />
+        <button onclick="checkAnswer()">こたえる</button>
+        <div class="result" id="result"></div>
+      `;
+      window.timeAttackActive = true;
+      window.timeAttackProgress = 0;
+      window.timeAttackStartTime = Date.now();
+      nextTimeAttackQuestion();
+    }
+
+    function nextTimeAttackQuestion() {
+      const key = generatorKeys[Math.floor(Math.random() * generatorKeys.length)];
+      window.currentGenerator = generators[key];
+      nextQuestion();
+    }
+
+    // モーダル開く関数（レベル指定）
+    function openModal(levelId) {
+      const modal = document.getElementById("modal");
+      modal.classList.add("show");
+      // タイトルセット
+      document.getElementById("modalTitle").textContent = `Level: ${levelId}`;
+      // 問題を生成する関数をセット
+      window.currentGenerator = generators[levelId];
+      nextModalQuestion();
+      // フォーカスは数字パッド入力だからinputはフォーカス不可
+    }
+
+    // モーダル閉じる
+    function closeModal() {
+      const modal = document.getElementById("modal");
+      modal.classList.remove("show");
+      // クリア
+      document.getElementById("modalResult").textContent = "";
+      document.getElementById("modalAnswerInput").value = "";
+    }
+
+    // モーダルで次の問題表示
+    function nextModalQuestion() {
+      const q = window.currentGenerator();
+      window.currentProblem = q;
+      document.getElementById("modalQuestion").textContent = `${q.a} ${q.op} ${q.b} = ?`;
+      document.getElementById("modalAnswerInput").value = "";
+      document.getElementById("modalResult").textContent = "";
+    }
+
+    // モーダルで答えチェック
+    function checkModalAnswer() {
+      const userAnswer = parseInt(document.getElementById("modalAnswerInput").value);
+      const correct = window.currentProblem.op === "+"
+        ? window.currentProblem.a + window.currentProblem.b
+        : window.currentProblem.a - window.currentProblem.b;
+      const resultDiv = document.getElementById("modalResult");
+
+      if (userAnswer === correct) {
+        resultDiv.innerHTML = `⭕ せいかい！<br><button onclick="nextModalQuestion()">つぎへ ▶</button>`;
+      } else {
+        resultDiv.textContent = "❌ まちがい！もういちど！";
+      }
+    }
+
+    // 元の目次リンクにイベント追加（モーダル表示）
+    document.querySelectorAll("a[href^='#']").forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault(); // ページスクロール防止
+        const level = e.target.getAttribute("href").replace("#", "");
+        if (generators[level]) openModal(level);
+      });
+    });
+
+    // モーダル内の数字ボタンのイベント設定
+    document.addEventListener("DOMContentLoaded", () => {
+      const modalNumPad = document.getElementById("modalNumPad");
+      if (!modalNumPad) return;
+
+      modalNumPad.addEventListener("click", e => {
+        const input = document.getElementById("modalAnswerInput");
+        if (!input) return;
+
+        const target = e.target;
+        if (target.tagName !== "BUTTON") return;
+
+        if (target.id === "clearBtn") {
+          input.value = "";
+        } else if (target.id === "backspaceBtn") {
+          input.value = input.value.slice(0, -1);
+        } else if (target.dataset.num !== undefined) {
+          input.value += target.dataset.num;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
